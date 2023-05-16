@@ -80,6 +80,6 @@ resource "aws_lambda_function" "terraform_lambda_func" {
   handler          = "index.handler"
   source_code_hash = data.archive_file.create_pre_signup_email_check_archive_file.output_base64sha256
   runtime          = "nodejs18.x"
-  timeout          = 30
+  timeout          = 20
   depends_on       = [aws_iam_role_policy_attachment.attach_iam_policy_to_iam_role]
 }
