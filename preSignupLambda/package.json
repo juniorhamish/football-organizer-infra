@@ -1,0 +1,9 @@
+{
+  "name": "cognito-pre-signup-lambda",
+  "version": "1.0.0",
+  "description": "Check for duplicate email in Cognito User Pool before signup",
+  "main": "index.mjs",
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.332.0"
+  }
+}
