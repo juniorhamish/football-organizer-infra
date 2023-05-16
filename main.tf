@@ -67,7 +67,7 @@ resource "null_resource" "main" {
   }
 
   provisioner "local-exec" {
-    command = "npm install"
+    command = "npm ci"
 
     working_dir = "${path.module}/preSignupLambda"
   }
