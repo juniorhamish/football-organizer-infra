@@ -28,11 +28,17 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up node
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: actions/setup-node@v3
         with:
           node-version: '19'
           cache: 'npm'
-          cache-dependency-path: preSignupLambda/package-lock.json
+          cache-dependency-path: preSignupLambda/layer/package-lock.json
+
+      - name: Install Dependencies
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: npm ci
+        working-directory: ./preSignupLambda/layer
 
       - name: Setup Terraform with specified version on the runner
         uses: hashicorp/setup-terraform@v2
