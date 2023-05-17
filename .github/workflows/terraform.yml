@@ -32,7 +32,11 @@ jobs:
         with:
           node-version: '19'
           cache: 'npm'
-          cache-dependency-path: preSignupLambda/package-lock.json
+          cache-dependency-path: preSignupLambda/layer/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: ./preSignupLambda/layer
 
       - name: Setup Terraform with specified version on the runner
         uses: hashicorp/setup-terraform@v2

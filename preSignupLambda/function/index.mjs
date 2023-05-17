@@ -17,7 +17,7 @@ export const handler = async (event, context, callback) => {
 
     const data = await client.send(listUsersCommand);
     if (data?.Users?.length > 0) {
-        callback(new Error("Email is already taken"), event);
+        callback(new Error("Email is already taken!"), event);
     } else {
         callback(null, event);
     }

@@ -1,5 +1,6 @@
 /**/node_modules/
 /.archive_files
+/builds
 
 # Local .terraform directories
 **/.terraform/*

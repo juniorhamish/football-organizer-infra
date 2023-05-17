@@ -9,25 +9,11 @@ terraform {
 
 provider "aws" {
   region = "eu-west-2"
-}
-
-resource "aws_iam_role" "cognito_pre_signup_lambda_role" {
-  name = "Cognito_Pre_Signup_Email_Check_Lambda_Role"
-  assume_role_policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Action" : "sts:AssumeRole",
-          "Principal" : {
-            "Service" : "lambda.amazonaws.com"
-          },
-          "Effect" : "Allow",
-          "Sid" : ""
-        }
-      ]
+  default_tags {
+    tags = {
+      Project = "Football Organizer"
     }
-  )
+  }
 }
 
 resource "aws_iam_policy" "cognito_pre_signup_policy" {
@@ -48,38 +34,37 @@ resource "aws_iam_policy" "cognito_pre_signup_policy" {
   )
 }
 
-resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role" {
-  role       = aws_iam_role.cognito_pre_signup_lambda_role.name
-  policy_arn = aws_iam_policy.cognito_pre_signup_policy.arn
-}
+module "lambda_function" {
+  source = "terraform-aws-modules/lambda/aws"
 
-data "archive_file" "create_pre_signup_email_check_archive_file" {
-  type        = "zip"
-  source_dir  = "preSignupLambda/"
-  output_path = "${path.module}/.archive_files/pre_signup_lambda.zip"
+  function_name = "Cognito_Unique_Email_Lambda_With_Layer"
+  description   = "Check email address is unique"
+  attach_policy = true
+  policy        = aws_iam_policy.cognito_pre_signup_policy.arn
+  handler       = "index.handler"
+  runtime       = "nodejs18.x"
+  timeout       = 20
+  publish       = true
 
-  depends_on = [null_resource.main]
-}
+  source_path = "./preSignupLambda/function"
 
-resource "null_resource" "main" {
-  triggers = {
-    updated_at = timestamp()
-  }
+  layers = [
+    module.lambda_layer_s3.lambda_layer_arn,
+  ]
 
-  provisioner "local-exec" {
-    command = "npm ci"
-
-    working_dir = "${path.module}/preSignupLambda"
+  environment_variables = {
+    Serverless = "Terraform"
   }
 }
 
-resource "aws_lambda_function" "terraform_lambda_func" {
-  filename         = "${path.module}/.archive_files/pre_signup_lambda.zip"
-  function_name    = "Cognito_Unique_Email_Lambda"
-  role             = aws_iam_role.cognito_pre_signup_lambda_role.arn
-  handler          = "index.handler"
-  source_code_hash = data.archive_file.create_pre_signup_email_check_archive_file.output_base64sha256
-  runtime          = "nodejs18.x"
-  timeout          = 20
-  depends_on       = [aws_iam_role_policy_attachment.attach_iam_policy_to_iam_role]
+module "lambda_layer_s3" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  create_layer = true
+
+  layer_name          = "node_modules_cognito"
+  description         = "Node modules layer for cognito functions"
+  compatible_runtimes = ["nodejs18.x"]
+
+  source_path = "./preSignupLambda/layer"
 }
