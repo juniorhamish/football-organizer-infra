@@ -26,7 +26,7 @@ resource "aws_iam_policy" "cognito_pre_signup_policy" {
   name        = "Cognito_Pre_Signup_Policy"
   path        = "/"
   description = "AWS IAM Policy for accessing cognito users"
-  policy = jsonencode(
+  policy      = jsonencode(
     {
       "Version" : "2012-10-17",
       "Statement" : [
@@ -73,4 +73,56 @@ module "lambda_layer_s3" {
   compatible_runtimes = ["nodejs18.x"]
 
   source_path = "./preSignupLambda/layer"
+}
+
+resource "aws_cognito_user_pool" "football_organizer_user_pool" {
+  name                     = "Football Organizer"
+  alias_attributes         = ["email"]
+  auto_verified_attributes = ["email"]
+  mfa_configuration        = "OPTIONAL"
+  lambda_config {
+    pre_sign_up = module.lambda_function.lambda_function_arn
+  }
+  schema {
+    attribute_data_type      = "String"
+    name                     = "email"
+    developer_only_attribute = false
+    mutable                  = true
+    required                 = true
+    string_attribute_constraints {
+      max_length = "2048"
+      min_length = "0"
+    }
+  }
+  schema {
+    attribute_data_type      = "String"
+    name                     = "given_name"
+    developer_only_attribute = false
+    mutable                  = true
+    required                 = true
+    string_attribute_constraints {
+      max_length = "2048"
+      min_length = "0"
+    }
+  }
+  schema {
+    attribute_data_type      = "String"
+    name                     = "family_name"
+    developer_only_attribute = false
+    mutable                  = true
+    required                 = true
+    string_attribute_constraints {
+      max_length = "2048"
+      min_length = "0"
+    }
+  }
+  software_token_mfa_configuration {
+    enabled = true
+  }
+  user_attribute_update_settings {
+    attributes_require_verification_before_update = ["email"]
+  }
+  username_configuration {
+    case_sensitive = false
+  }
 }
