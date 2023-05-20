@@ -26,7 +26,7 @@ resource "aws_iam_policy" "cognito_pre_signup_policy" {
   name        = "Cognito_Pre_Signup_Policy"
   path        = "/"
   description = "AWS IAM Policy for accessing cognito users"
-  policy      = jsonencode(
+  policy = jsonencode(
     {
       "Version" : "2012-10-17",
       "Statement" : [
