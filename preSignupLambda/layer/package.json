@@ -4,6 +4,6 @@
   "description": "Check for duplicate email in Cognito User Pool before signup",
   "main": "index.mjs",
   "dependencies": {
-    "@aws-sdk/client-cognito-identity-provider": "^3.332.0"
+    "@aws-sdk/client-cognito-identity-provider": "^3.484.0"
   }
 }
